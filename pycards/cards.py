@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from enum import Enum
 import numpy as np
 from typing import List
+import random
 
 FACE_VALUES = {
     0: 'Ace',
@@ -52,8 +53,52 @@ class Cards:
     def __getitem__(self, key):
         return self.cards[key]
 
+    def __IADD__(self, other):
+        if isinstance(other, Card):
+            self.cards.append(other)
+        elif isinstance(other, Cards):
+            self.cards += other
+        else:
+            raise TypeError(f"Can't append object of type {type(other)} to cards")
+
     def shuffle(self):
         np.random.shuffle(self.cards)
+
+    def deal_card(self):
+        """
+        deals a single card from the top of the deck, removing it from the deck
+        """
+        card = self.cards[0]
+        self.cards = self.cards[1:]
+        return card
+
+    def play_card(self, card: Card):
+        """
+        Returns the specified card, and removes it from the cards
+        """
+
+        self.cards.remove(card)
+        return card
+
+    def play_cards(self, cards: "Cards"):
+        """
+        Returns the specified cards, and removes it from the cards
+        """
+        return Cards([self.play_card(card) for card in cards])
+
+    def play_random_card(self):
+        """
+        Returns a random card from the cards and removes it from the pile
+        """
+        card_to_play = random.choice(self.cards)
+        return self.play_card(card_to_play)
+
+    def play_all(self):
+        """
+        returns all cards and removes them from the cards
+        """
+        return self.play_cards(self.cards)
+
 
     @classmethod
     def empty(cls):
