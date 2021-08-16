@@ -16,6 +16,28 @@ class CribbagePlayer(Player):
         cards_to_play = Cards(random.choices(self.hand, k=n_required))
         return self.hand.play_cards(cards_to_play)
 
+    def play_pegging_card(self, current_pegging_score: int):
+        """
+        Choose a card from the players hand to play during the
+        pegging phase.
+
+        Requires the current pegging score.
+        """
+
+        if len(self.hand) == 0:
+            return None
+
+        if not any(
+            card.value + current_pegging_score <= 31
+            for card in self.hand
+        ):
+            return None
+
+        for card in self.hand:
+            if card.value + current_pegging_score <= 31:
+                self.hand.play_card(card)
+
+
 class Cribbage:
 
     def __init__(self, players: Players):
@@ -45,7 +67,7 @@ class Cribbage:
 
     def _decide_dealer(self) -> Player:
         
-        self.players.dealer = np.random.choice(self.players) 
+        self.players.dealer = random.choice(self.players) 
 
     def _check_for_winner(self):
 
@@ -60,7 +82,7 @@ class Cribbage:
         If there aren't the required number of cards in the deal pile
         then shuffle the discard pile and append them
         """
-        if required_cards > len(self.deal_pile):
+        if n_required_cards > len(self.deal_pile):
             self.discard_pile.shuffle()
             self.deal_pile += self.discard_pile
     

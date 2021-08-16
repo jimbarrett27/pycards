@@ -5,19 +5,19 @@ from typing import List
 import random
 
 FACE_VALUES = {
-    0: 'Ace',
-    1: 'Two',
-    2: 'Three',
-    3: 'Four',
-    4: 'Five',
-    5: 'Six',
-    6: 'Seven',
-    7: 'Eight',
-    8: 'Nine',
-    9: 'Ten',
-    10: 'Jack',
-    11: 'Queen',
-    12: 'King'
+    0: 'A',
+    1: '2',
+    2: '3',
+    3: '4',
+    4: '5',
+    5: '6',
+    6: '7',
+    7: '8',
+    8: '9',
+    9: 'T',
+    10: 'J',
+    11: 'Q',
+    12: 'K'
 }
 
 
