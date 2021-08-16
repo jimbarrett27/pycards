@@ -3,6 +3,8 @@ from enum import Enum
 import numpy as np
 from typing import List
 import random
+from itertools import combinations
+from copy import deepcopy
 
 FACE_VALUES = {
     0: 'A',
@@ -38,9 +40,24 @@ class Card:
     suit: Suit
     value: int
 
+    def __lt__(self, other):
+        """
+        Sort cards by their face value
+        """
+        return self.value < other.value
+
     def __repr__(self):
 
-        return f'{FACE_VALUES[self.value].upper()} OF {self.suit.name}'
+        return f'{FACE_VALUES[self.value]}{self.suit.name[0]}'
+
+    @classmethod
+    def from_strings(cls, name: str, suit: str):
+        name_to_face_value = {name: value for value, name in FACE_VALUES.items()}
+        return cls(
+            suit=Suit[suit.upper()],
+            value=name_to_face_value[name.upper()]
+        )
+
 
 @dataclass
 class Cards:
@@ -53,13 +70,15 @@ class Cards:
     def __getitem__(self, key):
         return self.cards[key]
 
-    def __IADD__(self, other):
+    def __iadd__(self, other):
         if isinstance(other, Card):
             self.cards.append(other)
         elif isinstance(other, Cards):
             self.cards += other
         else:
             raise TypeError(f"Can't append object of type {type(other)} to cards")
+
+        return self
 
     def shuffle(self):
         np.random.shuffle(self.cards)
@@ -99,6 +118,46 @@ class Cards:
         """
         return self.play_cards(self.cards)
 
+    def contains_flush(self, length: int) -> bool:
+        """
+        """
+
+        return bool(self.get_flushes(length, length))
+
+    def contains_straight(self, length: int) -> bool:
+        """
+        
+        """
+
+        return bool(self.get_straights(length, length))
+
+    def get_flushes(self, min_length: int, max_length: int) -> List["Cards"]:
+
+        eligible_cards = deepcopy(self)
+        flushes = []
+        for length in range(max_length, min_length-1, -1):
+            for cards in combinations(eligible_cards, length):
+                suits = [card.suit for card in cards]
+                is_flush = len(set(suits)) == 1
+                if is_flush:
+                    flushes.append(cards)
+                    eligible_cards.play_cards(cards)
+
+        return flushes
+
+    def get_straights(self, min_length: int, max_length: int) -> List["Cards"]:
+
+        eligible_cards = deepcopy(self)
+        straights = []
+        for length in range(max_length, min_length-1, -1):
+            for cards in combinations(eligible_cards, length):
+                cards = sorted(cards)
+                is_straight = all([c2.value - c1.value == 1 for c1, c2 in zip(cards[:-1], cards[1:])])
+                if is_straight:
+                    straights.append(cards)
+                    eligible_cards.play_cards(cards)
+
+        return straights
 
     @classmethod
     def empty(cls):

@@ -1,7 +1,8 @@
 import random
 
-from pycards.cards import make_standard_deck, Cards
+from pycards.cards import make_standard_deck, Cards, Card
 from pycards.players import Players, Player
+from copy import deepcopy
 
 from itertools import combinations
 
@@ -64,6 +65,13 @@ class Cribbage:
         else:
             raise ValueError("Invalid number of players")
 
+    @staticmethod
+    def _card_value(card: Card):
+        
+        if card.value < 9:
+            return card.value + 1
+        else:
+            return 10
 
     def _decide_dealer(self) -> Player:
         
@@ -96,23 +104,41 @@ class Cribbage:
                 player.hand += self.deal_pile.deal_card()
 
 
-    def _score_hand(self, hand: Cards):
+    def _score_hand(self, hand: Cards, is_crib: bool = False):
 
         hand_score = 0
 
+        effective_hand = deepcopy(hand)
+        effective_hand += self.turn_up_card
+
         # look for 15s
         for n_cards in [2,3,4,5]:
-            for cards in combinations(hand, n_cards):
-                if sum(card.value for card in cards) == 15:
+            for cards in combinations(effective_hand, n_cards):
+                if sum(self._card_value(card) for card in cards) == 15:
                     hand_score += 2
 
-        # look for runs
+        # look for pairs
+        for card1, card2 in combinations(effective_hand, 2):
+            if card1.value == card2.value:
+                hand_score += 2
 
         # look for flushes
+        if effective_hand.contains_flush(5):
+            hand_score += 5
+        # can only get flushes of 4 in certain situations
+        elif hand.contains_flush(4) and not is_crib:
+            hand_score += 4
 
+        # look for runs
+        runs = effective_hand.get_straights(3, 5)
+        hand_score += sum(map(len, runs))
+        
         # look for knobs
+        for card in hand:
+            if card.value == 10 and card.suit == self.turn_up_card.suit:
+                hand_score += 1
 
-        pass
+        return hand_score
 
     def _receive_crib_cards_from_players(self):
         
@@ -132,16 +158,20 @@ class Cribbage:
         self._fix_deal_pile(n_required_cards)
         self.turn_up_card = self.deal_pile.play_random_card()
 
-        if self.turn_up_card.value == 11:
+        if self.turn_up_card.value == 10:
             self.players.dealer.score += 2
 
     def _play_pegging_phase(self):
+
+        # TODO
         pass
 
     def _score_hands(self):
         
         for player in self.players:
             player.score += self._score_hand(player.hand)
+
+            # TODO: return if winner
 
 
     def _discard_hands_and_crib(self):
@@ -160,10 +190,3 @@ class Cribbage:
             self._play_pegging_phase()
             self._score_hands()
             self._discard_hands_and_crib()
-
-
-            
-
-        
-
-
