@@ -62,7 +62,7 @@ class Card:
 
     def __repr__(self):
 
-        return f'{FACE_VALUES[self.value]}{self.suit.name[0]}'
+        return f'{FACE_VALUE_TO_STR[self.value]}{self.suit.name[0]}'
 
     @classmethod
     def from_string(cls, card_str: str):
@@ -77,10 +77,10 @@ class Card:
         """
 
         if len(card_str) != 2:
-            raise ValueError("The card string is in the wrong format")
+            raise ValueError(f"The card string {card_str} is in the wrong format")
 
-        value = STR_TO_FACE_VALUE[card_str[0]]
-        suit = Suit.from_string(card_str[1]).upper()
+        value = STR_TO_FACE_VALUE[card_str[0].upper()]
+        suit = Suit.from_string(card_str[1].upper())
 
         return cls(
             suit=suit,
@@ -108,6 +108,13 @@ class Cards:
             raise TypeError(f"Can't append object of type {type(other)} to cards")
 
         return self
+
+    def __repr__(self) -> str:
+        return ' '.join([str(card) for card in self.cards])
+
+    @classmethod
+    def from_string(cls, string, delimiter=' '):
+        return cls([Card.from_string(s) for s in string.split(delimiter)])
 
     def shuffle(self):
         np.random.shuffle(self.cards)

@@ -108,6 +108,8 @@ class Cribbage:
 
         hand_score = 0
 
+        print(hand, type(hand))
+
         effective_hand = deepcopy(hand)
         effective_hand += self.turn_up_card
 
