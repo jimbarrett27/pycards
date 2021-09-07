@@ -6,7 +6,7 @@ import random
 from itertools import combinations
 from copy import deepcopy
 
-FACE_VALUES = {
+FACE_VALUE_TO_STR = {
     0: 'A',
     1: '2',
     2: '3',
@@ -22,6 +22,8 @@ FACE_VALUES = {
     12: 'K'
 }
 
+STR_TO_FACE_VALUE = {s: v for v,s in FACE_VALUE_TO_STR.items()}
+
 
 class Suit(Enum):
     """
@@ -32,6 +34,18 @@ class Suit(Enum):
     HEARTS = 2
     DIAMONDS = 3
     CLUBS = 4
+
+    @classmethod
+    def from_string(cls, string):
+
+        if string == 'S':
+            return cls.SPADES
+        elif string == 'H':
+            return cls.HEARTS
+        elif string == 'D':
+            return cls.DIAMONDS
+        elif string == 'C':
+            return cls.CLUBS
 
 
 @dataclass(frozen=True)
@@ -48,14 +62,29 @@ class Card:
 
     def __repr__(self):
 
-        return f'{FACE_VALUES[self.value]}{self.suit.name[0]}'
+        return f'{FACE_VALUE_TO_STR[self.value]}{self.suit.name[0]}'
 
     @classmethod
-    def from_strings(cls, name: str, suit: str):
-        name_to_face_value = {name: value for value, name in FACE_VALUES.items()}
+    def from_string(cls, card_str: str):
+        """
+        Takes a 2 character string representing the card and returns that card
+
+        e.g., 
+        AH = Ace of Hearts
+        5D = Five of Diamonds
+        JC = Jack of Clubs
+        TS = Ten of Spades
+        """
+
+        if len(card_str) != 2:
+            raise ValueError(f"The card string {card_str} is in the wrong format")
+
+        value = STR_TO_FACE_VALUE[card_str[0].upper()]
+        suit = Suit.from_string(card_str[1].upper())
+
         return cls(
-            suit=Suit[suit.upper()],
-            value=name_to_face_value[name.upper()]
+            suit=suit,
+            value=value
         )
 
 
@@ -79,6 +108,13 @@ class Cards:
             raise TypeError(f"Can't append object of type {type(other)} to cards")
 
         return self
+
+    def __repr__(self) -> str:
+        return ' '.join([str(card) for card in self.cards])
+
+    @classmethod
+    def from_string(cls, string, delimiter=' '):
+        return cls([Card.from_string(s) for s in string.split(delimiter)])
 
     def shuffle(self):
         np.random.shuffle(self.cards)
