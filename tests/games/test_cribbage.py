@@ -34,6 +34,4 @@ def test_score_cribbage_hands():
 
             is_crib = is_crib == '1'
 
-            print(hand, turn_up)
-
             assert cribbage._score_hand(hand, is_crib) == int(score)

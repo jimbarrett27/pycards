@@ -215,9 +215,9 @@ class Cards:
 
                 is_straight = all([c2.value - c1.value == 1 for c1, c2 in zip(combo[:-1], combo[1:])])
                 if is_straight:
-                    flush = Cards(list(combo))
-                    if flush not in straights:
-                        straights.append(flush)
+                    straight = Cards(list(combo))
+                    if straight not in straights:
+                        straights.append(straight)
                         combos_to_ignore += list(combinations(combo, length))
                 else:
                     next_row += list(combinations(combo, length))
