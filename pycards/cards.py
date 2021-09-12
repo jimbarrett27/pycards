@@ -64,6 +64,9 @@ class Card:
 
         return f'{FACE_VALUE_TO_STR[self.value]}{self.suit.name[0]}'
 
+    def __hash__(self):
+        return self.suit.__hash__() + self.value.__hash__()
+
     @classmethod
     def from_string(cls, card_str: str):
         """
@@ -169,29 +172,57 @@ class Cards:
 
     def get_flushes(self, min_length: int, max_length: int) -> List["Cards"]:
 
-        eligible_cards = deepcopy(self)
         flushes = []
-        for length in range(max_length, min_length-1, -1):
-            for cards in combinations(eligible_cards, length):
-                suits = [card.suit for card in cards]
+        combos_to_check = list(combinations(self.cards, max_length))
+        combos_to_ignore = []
+
+        for length in range(max_length-1, min_length-2, -1):
+
+            next_row = []
+            for combo in combos_to_check:
+                if combo in combos_to_ignore:
+                    continue
+
+                suits = [card.suit for card in combo]
                 is_flush = len(set(suits)) == 1
                 if is_flush:
-                    flushes.append(cards)
-                    eligible_cards.play_cards(cards)
+                    flush = Cards(list(combo))
+                    if flush not in flushes:
+                        flushes.append(flush)
+                        combos_to_ignore += list(combinations(combo, length))
+                else:
+                    next_row += list(combinations(combo, length))
+
+            combos_to_check = next_row
 
         return flushes
 
     def get_straights(self, min_length: int, max_length: int) -> List["Cards"]:
 
-        eligible_cards = deepcopy(self)
         straights = []
-        for length in range(max_length, min_length-1, -1):
-            for cards in combinations(eligible_cards, length):
-                cards = sorted(cards)
-                is_straight = all([c2.value - c1.value == 1 for c1, c2 in zip(cards[:-1], cards[1:])])
+        combos_to_check = list(combinations(self.cards, max_length))
+        combos_to_ignore = []
+
+        for length in range(max_length-1, min_length-2, -1):
+
+            next_row = []
+            for combo in combos_to_check:
+
+                combo = tuple(sorted(combo))
+                
+                if combo in combos_to_ignore:
+                    continue
+
+                is_straight = all([c2.value - c1.value == 1 for c1, c2 in zip(combo[:-1], combo[1:])])
                 if is_straight:
-                    straights.append(cards)
-                    eligible_cards.play_cards(cards)
+                    flush = Cards(list(combo))
+                    if flush not in straights:
+                        straights.append(flush)
+                        combos_to_ignore += list(combinations(combo, length))
+                else:
+                    next_row += list(combinations(combo, length))
+
+            combos_to_check = next_row
 
         return straights
 
