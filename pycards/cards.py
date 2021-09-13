@@ -4,7 +4,7 @@ import numpy as np
 from typing import List
 import random
 from itertools import combinations
-from copy import deepcopy
+from collections import Counter
 
 FACE_VALUE_TO_STR = {
     0: 'A',
@@ -172,31 +172,16 @@ class Cards:
 
     def get_flushes(self, min_length: int, max_length: int) -> List["Cards"]:
 
+        suits = [card.suit for card in self.cards]
+        counts = Counter(suits)
+
         flushes = []
-        combos_to_check = list(combinations(self.cards, max_length))
-        combos_to_ignore = []
-
-        for length in range(max_length-1, min_length-2, -1):
-
-            next_row = []
-            for combo in combos_to_check:
-                if combo in combos_to_ignore:
-                    continue
-
-                suits = [card.suit for card in combo]
-                is_flush = len(set(suits)) == 1
-                if is_flush:
-                    flush = Cards(list(combo))
-                    if flush not in flushes:
-                        flushes.append(flush)
-                        combos_to_ignore += list(combinations(combo, length))
-                else:
-                    next_row += list(combinations(combo, length))
-
-            combos_to_check = next_row
+        for suit, count in counts.most_common():
+            if max_length >= count >= min_length:
+                flushes.append(Cards([card for card in self.cards if card.suit == suit]))
 
         return flushes
-
+                
     def get_straights(self, min_length: int, max_length: int) -> List["Cards"]:
 
         straights = []
