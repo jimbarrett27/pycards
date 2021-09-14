@@ -1,10 +1,10 @@
 from dataclasses import dataclass
-from enum import Enum
+from enum import Enum, unique
 import numpy as np
 from typing import List
 import random
-from itertools import combinations
-from collections import Counter
+from itertools import product
+from collections import Counter, defaultdict
 
 FACE_VALUE_TO_STR = {
     0: 'A',
@@ -183,33 +183,37 @@ class Cards:
         return flushes
                 
     def get_straights(self, min_length: int, max_length: int) -> List["Cards"]:
+        
+        val_to_cards = defaultdict(list)
+        for card in self.cards:
+            val_to_cards[card.value].append(card)
+        
+        vals = np.sort(list(val_to_cards))
+        diffs = np.diff(vals)
 
-        straights = []
-        combos_to_check = list(combinations(self.cards, max_length))
-        combos_to_ignore = []
+        runs = []
+        current_run = [vals[0]]
+        for start_ind in range(len(diffs)):
+            if diffs[start_ind] == 1:
+                current_run.append(vals[start_ind+1])
+            else:
+                runs.append(current_run)
+                current_run = [vals[start_ind+1]]
 
-        for length in range(max_length-1, min_length-2, -1):
+        runs.append(current_run)
 
-            next_row = []
-            for combo in combos_to_check:
+        card_runs = []
+        for run in runs:
+            if not (min_length <= len(run) <= max_length):
+                continue
 
-                combo = tuple(sorted(combo))
-                
-                if combo in combos_to_ignore:
-                    continue
+            all_runs = product(*[val_to_cards[val] for val in run])
+            runs_as_cards = [Cards(list(r)) for r in all_runs]
 
-                is_straight = all([c2.value - c1.value == 1 for c1, c2 in zip(combo[:-1], combo[1:])])
-                if is_straight:
-                    straight = Cards(list(combo))
-                    if straight not in straights:
-                        straights.append(straight)
-                        combos_to_ignore += list(combinations(combo, length))
-                else:
-                    next_row += list(combinations(combo, length))
+            card_runs += runs_as_cards
+            
+        return card_runs
 
-            combos_to_check = next_row
-
-        return straights
 
     @classmethod
     def empty(cls):
