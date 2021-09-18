@@ -60,7 +60,6 @@ def test_player_order_generator():
 
     players = _make_n_players(2)
     player_order_gen = players.get_player_order_generator()
-    print(type(player_order_gen))
     assert not next(player_order_gen).is_dealer
     assert next(player_order_gen).is_dealer
     assert not next(player_order_gen).is_dealer
@@ -69,7 +68,7 @@ def test_player_order_generator():
     players = _make_n_players(4)
     players.dealer = players[1]
     player_order_gen = players.get_player_order_generator()
-    for _ in range(5):
+    for _ in range(3):
         assert next(player_order_gen) is players[2]
         assert next(player_order_gen) is players[3]
         assert next(player_order_gen) is players[0]
