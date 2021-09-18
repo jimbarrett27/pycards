@@ -17,13 +17,15 @@ class CribbagePlayer(Player):
         cards_to_play = Cards(random.choices(self.hand, k=n_required))
         return self.hand.play_cards(cards_to_play)
 
-    def play_pegging_card(self, current_pegging_score: int):
+    def play_pegging_card(self, pegged_cards: Cards):
         """
         Choose a card from the players hand to play during the
         pegging phase.
 
         Requires the current pegging score.
         """
+
+        current_pegging_score = sum(min((card.value + 1), 10) for card in pegged_cards)
 
         if len(self.hand) == 0:
             return None
@@ -162,9 +164,18 @@ class Cribbage:
             self.players.dealer.score += 2
 
     def _play_pegging_phase(self):
+        
+        player_order_gen = self.players.get_player_order_generator()
 
-        # TODO
-        pass
+        pegged_cards = Cards.empty()
+        while any(len(player.hand) for player in self.players):
+
+            player = next(player_order_gen)
+            pegged_cards += player.play_
+
+
+
+        
 
     def _score_hands(self):
         
@@ -187,6 +198,7 @@ class Cribbage:
         while True:
             self._deal_cards_to_players()
             self._receive_crib_cards_from_players()
+            self._choose_turn_up()
             self._play_pegging_phase()
             self._score_hands()
             self._discard_hands_and_crib()

@@ -1,6 +1,6 @@
 from .cards import Cards
 from dataclasses import dataclass
-from typing import List
+from typing import Generator, List
 
 @dataclass
 class Player:
@@ -31,6 +31,10 @@ class Players:
 
         return None
 
+    @property
+    def n_players(self):
+        return len(self)
+
     @dealer.setter
     def dealer(self, new_dealer: Player):
 
@@ -52,7 +56,19 @@ class Players:
         current_dealer_ind = self.players.index(self.dealer)
         self.players[current_dealer_ind].is_dealer = False
         self.players[(current_dealer_ind + 1) % len(self)].is_dealer = True
+
+    def get_player_order_generator(self) -> Generator[Player]:
+
+        current_dealer_ind = self.players.index(self.dealer)
+
+        def player_order_gen():
+            i = 0
+            while True:
+                i += 1
+                yield self.players[(current_dealer_ind + i) % self.n_players]
+
         
+        return player_order_gen()
 
     def deal_cards_to_players(self, cards: Cards, cards_per_player: int):
         """

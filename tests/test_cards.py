@@ -90,3 +90,8 @@ def test_straights():
     example_hand = Cards.from_string('JH TS QD')
     assert example_hand.contains_straight(3)
     assert len(example_hand.get_straights(3, 3)) == 1
+
+    # check if we can get multiple straights
+    example_hand = Cards.from_string('AD 2S 3H JH TS QD')
+    assert example_hand.contains_straight(3)
+    assert len(example_hand.get_straights(3, 3)) == 2
