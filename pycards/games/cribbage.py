@@ -1,13 +1,24 @@
+"""
+Rules for the game of Cribbage
+"""
+
 import random
 from copy import deepcopy
 from itertools import combinations
 
-from pycards.cards import Card, Cards, make_standard_deck
+from pycards.cards import Card, Cards
 from pycards.players import Player, Players
 
 
 class CribbagePlayer(Player):
+    """
+    Child class of PLayer to add cribbage specific functionality
+    """
+
     def give_cards_to_crib(self, n_required):
+        """
+        Choose which cards to give to the crib
+        """
 
         if n_required not in {1, 2}:
             raise ValueError("Requested weird number of cards for crib")
@@ -33,10 +44,16 @@ class CribbagePlayer(Player):
 
         for card in self.hand:
             if card.value + current_pegging_score <= 31:
-                self.hand.play_card(card)
+                return self.hand.play_card(card)
+
+        return None
 
 
 class Cribbage:
+    """
+    Rules and tracking variables for a game of cribbage
+    """
+
     def __init__(self, players: Players):
 
         self.players = players
@@ -49,25 +66,32 @@ class Cribbage:
 
     @property
     def n_players(self):
-        return len(self.players)
+        """
+        number of players in the game
+        """
+        return self.players.n_players
 
     @property
     def cards_per_player(self) -> int:
+        """
+        The number of cards each player should start a round'
+        with, depending on the number of players
+        """
 
         if self.n_players == 2:
             return 6
-        elif self.n_players in {3, 4}:
+        if self.n_players in {3, 4}:
             return 5
-        else:
-            raise ValueError("Invalid number of players")
+
+        raise ValueError("Invalid number of players")
 
     @staticmethod
     def _card_value(card: Card):
 
         if card.value < 9:
             return card.value + 1
-        else:
-            return 10
+
+        return 10
 
     def _decide_dealer(self) -> Player:
 
@@ -171,7 +195,9 @@ class Cribbage:
         for player in self.players:
             player.score += self._score_hand(player.hand)
 
-            # TODO: return if winner
+            # return if winner
+
+            return player
 
     def _discard_hands_and_crib(self):
 
@@ -182,6 +208,9 @@ class Cribbage:
         self.discard_pile += self.turn_up_card
 
     def play(self):
+        """
+        The main game loop
+        """
 
         while True:
             self._deal_cards_to_players()
