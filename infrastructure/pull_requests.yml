@@ -1,0 +1,27 @@
+steps:
+  # Install dependencies
+  - name: python
+    entrypoint: pip
+    args: ["install", "-r", "requirements.txt", "--user"]
+
+  # Check import formatting
+  - name: python
+    entrypoint: python
+    args: ["-m", "isort", "--check", "pycards"]
+
+  # Check formatting
+  - name: python
+    entrypoint: python
+    args: ["-m", "black", "--check", "pycards"]
+
+  # Check formatting
+  - name: python
+    entrypoint: python
+    args: ["-m", "pylint", "pycards"]
+
+  # Run tests
+  - name: python
+    entrypoint: python
+    args: ["-m", "pytest"]
+  
+timeout: "1600s"
