@@ -1,6 +1,8 @@
-from .cards import Cards
 from dataclasses import dataclass
 from typing import Generator, List
+
+from .cards import Cards
+
 
 @dataclass
 class Player:
@@ -8,9 +10,10 @@ class Player:
     is_dealer: bool
     name: str
     seat_position: int
-    
+
     hand: Cards = Cards.empty()
     score: int = 0
+
 
 @dataclass
 class Players:
@@ -47,7 +50,6 @@ class Players:
             else:
                 player.is_dealer = False
 
-
     def _permute_dealer(self):
         """
         Moves the dealer to the next player
@@ -67,14 +69,12 @@ class Players:
                 i += 1
                 yield self.players[(current_dealer_ind + i) % self.n_players]
 
-        
         return player_order_gen()
 
     def deal_cards_to_players(self, cards: Cards, cards_per_player: int):
         """
-        deal cards one by one to each player, starting from the left of the 
+        deal cards one by one to each player, starting from the left of the
         dealer, until each player has cards_per_player cards
         """
-        
-        # TODO
 
+        # TODO

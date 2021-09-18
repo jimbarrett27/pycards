@@ -1,28 +1,29 @@
+import random
+from collections import Counter, defaultdict
 from dataclasses import dataclass
 from enum import Enum, unique
-import numpy as np
-from typing import List
-import random
 from itertools import product
-from collections import Counter, defaultdict
+from typing import List
+
+import numpy as np
 
 FACE_VALUE_TO_STR = {
-    0: 'A',
-    1: '2',
-    2: '3',
-    3: '4',
-    4: '5',
-    5: '6',
-    6: '7',
-    7: '8',
-    8: '9',
-    9: 'T',
-    10: 'J',
-    11: 'Q',
-    12: 'K'
+    0: "A",
+    1: "2",
+    2: "3",
+    3: "4",
+    4: "5",
+    5: "6",
+    6: "7",
+    7: "8",
+    8: "9",
+    9: "T",
+    10: "J",
+    11: "Q",
+    12: "K",
 }
 
-STR_TO_FACE_VALUE = {s: v for v,s in FACE_VALUE_TO_STR.items()}
+STR_TO_FACE_VALUE = {s: v for v, s in FACE_VALUE_TO_STR.items()}
 
 
 class Suit(Enum):
@@ -38,13 +39,13 @@ class Suit(Enum):
     @classmethod
     def from_string(cls, string):
 
-        if string == 'S':
+        if string == "S":
             return cls.SPADES
-        elif string == 'H':
+        elif string == "H":
             return cls.HEARTS
-        elif string == 'D':
+        elif string == "D":
             return cls.DIAMONDS
-        elif string == 'C':
+        elif string == "C":
             return cls.CLUBS
 
 
@@ -62,7 +63,7 @@ class Card:
 
     def __repr__(self):
 
-        return f'{FACE_VALUE_TO_STR[self.value]}{self.suit.name[0]}'
+        return f"{FACE_VALUE_TO_STR[self.value]}{self.suit.name[0]}"
 
     def __hash__(self):
         return self.suit.__hash__() + self.value.__hash__()
@@ -72,7 +73,7 @@ class Card:
         """
         Takes a 2 character string representing the card and returns that card
 
-        e.g., 
+        e.g.,
         AH = Ace of Hearts
         5D = Five of Diamonds
         JC = Jack of Clubs
@@ -85,10 +86,7 @@ class Card:
         value = STR_TO_FACE_VALUE[card_str[0].upper()]
         suit = Suit.from_string(card_str[1].upper())
 
-        return cls(
-            suit=suit,
-            value=value
-        )
+        return cls(suit=suit, value=value)
 
 
 @dataclass
@@ -113,10 +111,10 @@ class Cards:
         return self
 
     def __repr__(self) -> str:
-        return ' '.join([str(card) for card in self.cards])
+        return " ".join([str(card) for card in self.cards])
 
     @classmethod
-    def from_string(cls, string, delimiter=' '):
+    def from_string(cls, string, delimiter=" "):
         return cls([Card.from_string(s) for s in string.split(delimiter)])
 
     def shuffle(self):
@@ -158,15 +156,12 @@ class Cards:
         return self.play_cards(self.cards)
 
     def contains_flush(self, length: int) -> bool:
-        """
-        """
+        """ """
 
         return bool(self.get_flushes(length, length))
 
     def contains_straight(self, length: int) -> bool:
-        """
-        
-        """
+        """ """
 
         return bool(self.get_straights(length, length))
 
@@ -178,16 +173,18 @@ class Cards:
         flushes = []
         for suit, count in counts.most_common():
             if max_length >= count >= min_length:
-                flushes.append(Cards([card for card in self.cards if card.suit == suit]))
+                flushes.append(
+                    Cards([card for card in self.cards if card.suit == suit])
+                )
 
         return flushes
-                
+
     def get_straights(self, min_length: int, max_length: int) -> List["Cards"]:
-        
+
         val_to_cards = defaultdict(list)
         for card in self.cards:
             val_to_cards[card.value].append(card)
-        
+
         vals = np.sort(list(val_to_cards))
         diffs = np.diff(vals)
 
@@ -195,10 +192,10 @@ class Cards:
         current_run = [vals[0]]
         for start_ind in range(len(diffs)):
             if diffs[start_ind] == 1:
-                current_run.append(vals[start_ind+1])
+                current_run.append(vals[start_ind + 1])
             else:
                 runs.append(current_run)
-                current_run = [vals[start_ind+1]]
+                current_run = [vals[start_ind + 1]]
 
         runs.append(current_run)
 
@@ -211,9 +208,8 @@ class Cards:
             runs_as_cards = [Cards(list(r)) for r in all_runs]
 
             card_runs += runs_as_cards
-            
-        return card_runs
 
+        return card_runs
 
     @classmethod
     def empty(cls):
@@ -226,7 +222,7 @@ class Cards:
 
 
 def make_standard_deck(shuffle: bool = True) -> Cards:
-    
+
     cards = []
     for suit in Suit:
         for value in range(13):
@@ -238,4 +234,3 @@ def make_standard_deck(shuffle: bool = True) -> Cards:
         cards.shuffle()
 
     return cards
-
