@@ -57,7 +57,7 @@ class Players:
         self.players[current_dealer_ind].is_dealer = False
         self.players[(current_dealer_ind + 1) % len(self)].is_dealer = True
 
-    def get_player_order_generator(self) -> Generator[Player]:
+    def get_player_order_generator(self) -> Generator[Player, None, None]:
 
         current_dealer_ind = self.players.index(self.dealer)
 
