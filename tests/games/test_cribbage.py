@@ -35,3 +35,16 @@ def test_score_cribbage_hands():
             is_crib = is_crib == '1'
 
             assert cribbage._score_hand(hand, is_crib) == int(score)
+
+def test_cribbage_game_completes():
+    """
+    Plays random moves until the cribbage game completes,
+    to make sure it does
+    """
+
+    for n_players in [2,3,4]:
+
+        game = make_basic_cribbage_game(n_players=n_players)
+
+        game.play()
+

@@ -9,11 +9,34 @@ from itertools import combinations
 from pycards.cards import Card, Cards
 from pycards.players import Player, Players
 
+def _cribbage_card_value(card: Card):
+
+    if card.value < 9:
+        return card.value + 1
+
+    return 10
 
 class CribbagePlayer(Player):
     """
     Child class of PLayer to add cribbage specific functionality
     """
+
+    def can_peg(self, pegged_cards: Cards):
+        """
+        If the player can go in the pegging phase
+        """
+
+        if len(self.hand) == 0:
+            return False
+
+        min_value = min(map(_cribbage_card_value, self.hand))
+        current_pegging_score = sum(map(_cribbage_card_value, pegged_cards))
+
+        if current_pegging_score + min_value > 31:
+            return False
+
+        return True
+        
 
     def give_cards_to_crib(self, n_required):
         """
@@ -34,19 +57,15 @@ class CribbagePlayer(Player):
         Requires the current pegging score.
         """
 
-        current_pegging_score = sum(min((card.value + 1), 10) for card in pegged_cards)
-
-        if len(self.hand) == 0:
+        if not self.can_peg(pegged_cards):
             return None
 
-        if not any(card.value + current_pegging_score <= 31 for card in self.hand):
-            return None
+        min_card_value = min(map(_cribbage_card_value, self.hand))
 
         for card in self.hand:
-            if card.value + current_pegging_score <= 31:
+            if _cribbage_card_value(card) == min_card_value:
                 return self.hand.play_card(card)
 
-        return None
 
 
 class Cribbage:
@@ -54,9 +73,11 @@ class Cribbage:
     Rules and tracking variables for a game of cribbage
     """
 
-    def __init__(self, players: Players):
+    def __init__(self, players: Players, winning_points: int = 121):
 
         self.players = players
+        self.winning_points = winning_points
+
         self.deal_pile = Cards.standard_deck()
         self.discard_pile = Cards.empty()
         self.crib = Cards.empty()
@@ -83,15 +104,7 @@ class Cribbage:
         if self.n_players in {3, 4}:
             return 5
 
-        raise ValueError("Invalid number of players")
-
-    @staticmethod
-    def _card_value(card: Card):
-
-        if card.value < 9:
-            return card.value + 1
-
-        return 10
+        raise ValueError("Invalid number of players")    
 
     def _decide_dealer(self) -> Player:
 
@@ -100,7 +113,7 @@ class Cribbage:
     def _check_for_winner(self):
 
         for player in self.players:
-            if player.score >= 121:
+            if player.score >= self.winning_points:
                 return True
 
         return False
@@ -123,6 +136,8 @@ class Cribbage:
             for player in self.players:
                 player.hand += self.deal_pile.deal_card()
 
+
+
     def _score_hand(self, hand: Cards, is_crib: bool = False):
 
         hand_score = 0
@@ -133,7 +148,7 @@ class Cribbage:
         # look for 15s
         for n_cards in [2, 3, 4, 5]:
             for cards in combinations(effective_hand, n_cards):
-                if sum(self._card_value(card) for card in cards) == 15:
+                if sum(_cribbage_card_value(card) for card in cards) == 15:
                     hand_score += 2
 
         # look for pairs
@@ -173,31 +188,40 @@ class Cribbage:
             self.crib += self.deal_pile.deal_card()
 
     def _choose_turn_up(self):
-        n_required_cards = 1
-        self._fix_deal_pile(n_required_cards)
+        self._fix_deal_pile(n_required_cards=1)
         self.turn_up_card = self.deal_pile.play_random_card()
 
         if self.turn_up_card.value == 10:
             self.players.dealer.score += 2
 
+        return self._check_for_winner()
+
     def _play_pegging_phase(self):
 
         player_order_gen = self.players.get_player_order_generator()
 
-        pegged_cards = Cards.empty()
+        
         while any(len(player.hand) for player in self.players):
 
-            player = next(player_order_gen)
-            pegged_cards += player.play_
+            pegged_cards = Cards.empty()
+            while any(player.can_peg(pegged_cards) for player in self.players):
+
+                player = next(player_order_gen)
+
+                if player.can_peg(pegged_cards):
+                    pegged_cards += player.play_pegging_card(pegged_cards)
+
+                # TODO the scoring
+
+                if self._check_for_winner():
+                    return True            
+
+        return False
 
     def _score_hands(self):
 
         for player in self.players:
             player.score += self._score_hand(player.hand)
-
-            # return if winner
-
-            return player
 
     def _discard_hands_and_crib(self):
 
@@ -213,9 +237,16 @@ class Cribbage:
         """
 
         while True:
+
             self._deal_cards_to_players()
             self._receive_crib_cards_from_players()
-            self._choose_turn_up()
-            self._play_pegging_phase()
-            self._score_hands()
+            
+            if any(
+                [self._choose_turn_up(),
+                self._play_pegging_phase(),
+                self._score_hands()]
+            ): 
+                return self.winner()         
+                
+                
             self._discard_hands_and_crib()

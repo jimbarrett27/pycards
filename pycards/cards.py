@@ -145,13 +145,13 @@ class Cards:
         deals a single card from the top of the deck, removing it from the deck
         """
         card = self.cards[0]
-        self.cards = self.cards[1:]
-        return card
+        return self.play_card(card)
 
     def play_card(self, card: Card):
         """
         Returns the specified card, and removes it from the cards
         """
+        print(type(self.cards))
 
         self.cards.remove(card)
         return card
@@ -261,9 +261,7 @@ class Cards:
             for value in range(13):
                 cards.append(Card(suit, value))
 
-        cards = Cards(cards)
-
         if shuffle:
-            cards.shuffle()
+            random.shuffle(cards)
 
         return cls(cards=cards)
