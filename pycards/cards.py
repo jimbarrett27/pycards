@@ -115,6 +115,7 @@ class Cards:
         return self.cards[key]
 
     def __iadd__(self, other):
+
         if isinstance(other, Card):
             self.cards.append(other)
         elif isinstance(other, Cards):
@@ -151,8 +152,6 @@ class Cards:
         """
         Returns the specified card, and removes it from the cards
         """
-        print(type(self.cards))
-
         self.cards.remove(card)
         return card
 
@@ -169,11 +168,13 @@ class Cards:
         card_to_play = random.choice(self.cards)
         return self.play_card(card_to_play)
 
-    def play_all(self):
+    def play_all(self) -> "Cards":
         """
         returns all cards and removes them from the cards
         """
-        return self.play_cards(self.cards)
+        # take a copy of the cards
+        cards_to_play = list(self.cards)
+        return self.play_cards(cards_to_play)
 
     def contains_flush(self, length: int) -> bool:
         """ "
