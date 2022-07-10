@@ -1,27 +1,36 @@
-from pycards.players import Player, Players
+# pylint: disable=missing-function-docstring,protected-access
+
+"""
+test for the players objects and associated methods
+"""
+
 import random
 
-def _make_n_players(n: int):
+from pycards.players import Player, Players
+
+
+def _make_n_players(n_players: int):
     """
     Helper function to make n random players
     for testing, with exactly one dealer
     """
 
-    dealer_ind = random.choice(range(n))
+    dealer_ind = random.choice(range(n_players))
 
-    return Players([
-        Player(
-            is_dealer=(i==dealer_ind),
-            name='',
-            seat_position=i
-        ) for i in range(n)
-    ])
+    return Players(
+        [
+            Player(is_dealer=(i == dealer_ind), name="", seat_position=i)
+            for i in range(n_players)
+        ]
+    )
+
 
 def test_get_dealer():
 
-    for i in range(2,5):
+    for i in range(2, 5):
         players = _make_n_players(i)
         assert players.dealer.is_dealer
+
 
 def test_permute_dealer():
     """
@@ -49,7 +58,7 @@ def test_permute_dealer():
         for _ in range(n_players - 1):
             players._permute_dealer()
             assert sum(player.is_dealer for player in players) == 1
-        
+
         assert initial_dealer.is_dealer
         for player in players:
             if player != initial_dealer:
@@ -63,7 +72,6 @@ def test_player_order_generator():
     assert not next(player_order_gen).is_dealer
     assert next(player_order_gen).is_dealer
     assert not next(player_order_gen).is_dealer
-
 
     players = _make_n_players(4)
     players.dealer = players[1]

@@ -5,7 +5,7 @@ All the functionality to handle a card player or group of card players
 from dataclasses import dataclass, field
 from typing import Generator, List
 
-from .cards import Cards
+from pycards.cards import Cards
 
 
 @dataclass
@@ -18,7 +18,7 @@ class Player:
     name: str
     seat_position: int
 
-    hand: Cards = field(default_factory=lambda: Cards.empty())
+    hand: Cards = field(default_factory=Cards.empty)
     score: int = 0
 
 

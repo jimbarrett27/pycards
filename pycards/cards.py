@@ -124,7 +124,7 @@ class Cards:
             raise TypeError(f"Can't append object of type {type(other)} to cards")
 
         return self
-        
+
     def __repr__(self) -> str:
         return " ".join([str(card) for card in self.cards])
 
@@ -172,7 +172,8 @@ class Cards:
         """
         returns all cards and removes them from the cards
         """
-        cards_to_play = [card for card in self.cards]
+        # take a copy of the cards
+        cards_to_play = list(self.cards)
         return self.play_cards(cards_to_play)
 
     def contains_flush(self, length: int) -> bool:
