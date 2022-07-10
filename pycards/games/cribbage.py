@@ -2,12 +2,12 @@
 Rules for the game of Cribbage
 """
 
-import random
 from copy import deepcopy
 from itertools import combinations
 
 from pycards.cards import Card, Cards
 from pycards.players import Player, Players
+import numpy as np
 
 def _cribbage_card_value(card: Card):
 
@@ -46,7 +46,7 @@ class CribbagePlayer(Player):
         if n_required not in {1, 2}:
             raise ValueError("Requested weird number of cards for crib")
 
-        cards_to_play = Cards(random.choices(self.hand, k=n_required))
+        cards_to_play = Cards(np.random.choice(self.hand, size=n_required, replace=False))
         return self.hand.play_cards(cards_to_play)
 
     def play_pegging_card(self, pegged_cards: Cards):
@@ -108,15 +108,15 @@ class Cribbage:
 
     def _decide_dealer(self) -> Player:
 
-        self.players.dealer = random.choice(self.players)
+        self.players.dealer = np.random.choice(self.players)
 
-    def _check_for_winner(self):
-
+    def _find_winner(self) -> Player:
+        
         for player in self.players:
             if player.score >= self.winning_points:
-                return True
+                return player
 
-        return False
+        return None
 
     def _fix_deal_pile(self, n_required_cards):
         """
@@ -132,11 +132,10 @@ class Cribbage:
         n_required_cards = self.n_players * self.cards_per_player
         self._fix_deal_pile(n_required_cards)
 
-        for _ in range(self.cards_per_player):
-            for player in self.players:
-                player.hand += self.deal_pile.deal_card()
-
-
+        for player in self.players:
+            for _ in range(self.cards_per_player):
+                dealt_card = self.deal_pile.deal_card()
+                player.hand += dealt_card
 
     def _score_hand(self, hand: Cards, is_crib: bool = False):
 
@@ -194,7 +193,7 @@ class Cribbage:
         if self.turn_up_card.value == 10:
             self.players.dealer.score += 2
 
-        return self._check_for_winner()
+        return self._find_winner()
 
     def _play_pegging_phase(self):
 
@@ -213,7 +212,7 @@ class Cribbage:
 
                 # TODO the scoring
 
-                if self._check_for_winner():
+                if self._find_winner():
                     return True            
 
         return False
@@ -239,14 +238,18 @@ class Cribbage:
         while True:
 
             self._deal_cards_to_players()
+
             self._receive_crib_cards_from_players()
             
-            if any(
-                [self._choose_turn_up(),
-                self._play_pegging_phase(),
-                self._score_hands()]
+            for scoring_phase in (
+                self._choose_turn_up,
+                self._play_pegging_phase,
+                self._score_hands
             ): 
-                return self.winner()         
-                
-                
+                scoring_phase()
+
+                winner_or_none = self._find_winner()
+                if winner_or_none is not None:
+                    return winner_or_none
+                       
             self._discard_hands_and_crib()

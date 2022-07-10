@@ -42,9 +42,22 @@ def test_cribbage_game_completes():
     to make sure it does
     """
 
-    for n_players in [2,3,4]:
+    for n_players in [2]:
 
         game = make_basic_cribbage_game(n_players=n_players)
+        winner = game.play()
 
-        game.play()
+        assert winner.score >= 121
 
+def test_deal_cards_to_players():
+    
+    game = make_basic_cribbage_game(n_players=2)
+
+    for _ in range(100):
+        
+        game._deal_cards_to_players()
+        for player in game.players:
+            assert len(player.hand) == game.cards_per_player
+            assert len(player.hand) == len(set(player.hand))
+
+            game.discard_pile += player.hand.play_all()
