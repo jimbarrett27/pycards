@@ -35,6 +35,7 @@ def test_score_cribbage_hands():
         for cards, turn_up, is_crib, score in reader:
 
             hand = Cards.from_string(cards)
+            print(hand)
             cribbage.turn_up_card = Card.from_string(turn_up)
 
             is_crib = is_crib == "1"

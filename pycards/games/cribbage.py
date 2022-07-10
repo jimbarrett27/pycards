@@ -24,15 +24,17 @@ class CribbagePlayer(Player):
     Child class of PLayer to add cribbage specific functionality
     """
 
+    pegging_hand: Cards
+
     def can_peg(self, pegged_cards: Cards):
         """
         If the player can go in the pegging phase
         """
 
-        if len(self.hand) == 0:
+        if len(self.pegging_hand) == 0:
             return False
 
-        min_value = min(map(_cribbage_card_value, self.hand))
+        min_value = min(map(_cribbage_card_value, self.pegging_hand))
         current_pegging_score = sum(map(_cribbage_card_value, pegged_cards))
 
         if current_pegging_score + min_value > 31:
@@ -61,11 +63,11 @@ class CribbagePlayer(Player):
         Requires the current pegging score.
         """
 
-        min_card_value = min(map(_cribbage_card_value, self.hand))
+        min_card_value = min(map(_cribbage_card_value, self.pegging_hand))
 
-        for card in self.hand:
+        for card in self.pegging_hand:
             if _cribbage_card_value(card) == min_card_value:
-                return self.hand.play_card(card)
+                return self.pegging_hand.play_card(card)
 
         raise ValueError("No valid pegging card")
 
@@ -190,10 +192,12 @@ class Cribbage:
             self.crib += self.deal_pile.deal_card()
 
     def _choose_turn_up(self):
+        
         self._fix_deal_pile(n_required_cards=1)
         self.turn_up_card = self.deal_pile.play_random_card()
+        self.discard_pile += self.turn_up_card
 
-        if self.turn_up_card.value == 10:
+        if self.turn_up_card.value == FaceValue.JACK:
             self.players.dealer.score += 2
 
         return self._find_winner()
@@ -201,6 +205,9 @@ class Cribbage:
     def _play_pegging_phase(self):
 
         player_order_gen = self.players.get_player_order_generator()
+
+        for player in self.players:
+            player.pegging_hand = deepcopy(player.hand)
 
         while any(len(player.hand) for player in self.players):
 
@@ -234,8 +241,8 @@ class Cribbage:
         The main game loop
         """
 
-        while True:
-
+        i = 0
+        while i < 1000:
             self._deal_cards_to_players()
 
             self._receive_crib_cards_from_players()
@@ -252,4 +259,7 @@ class Cribbage:
                     return winner_or_none
 
             self._discard_hands_and_crib()
-            self.discard_pile += self.turn_up_card
+
+            i += 1
+
+        raise TimeoutError("Too many turns")

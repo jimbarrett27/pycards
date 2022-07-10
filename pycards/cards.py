@@ -149,12 +149,7 @@ class Cards:
         elif isinstance(other, Cards):
             return Cards(self.cards + other.cards)
 
-        raise TypeError(f"Can't add object of type {type(other)} to cards")        
-
-    def __iadd__(self, other):
-
-        self = self + other
-        return self
+        raise TypeError(f"Can't add object of type {type(other)} to cards")
 
     def __repr__(self) -> str:
         return " ".join([str(card) for card in self.cards])
