@@ -9,7 +9,7 @@ import numpy as np
 import pytest
 from hypothesis import given
 
-from pycards.cards import Card, Cards, Suit
+from pycards.cards import Card, Cards, Suit, FaceValue
 
 
 @st.composite
@@ -28,19 +28,19 @@ def cards_strategy(draw):
 def test_card_from_string():
 
     examples = {
-        "AH": Card(suit=Suit.HEARTS, value=0),
-        "2D": Card(suit=Suit.DIAMONDS, value=1),
-        "3C": Card(suit=Suit.CLUBS, value=2),
-        "4S": Card(suit=Suit.SPADES, value=3),
-        "5H": Card(suit=Suit.HEARTS, value=4),
-        "6D": Card(suit=Suit.DIAMONDS, value=5),
-        "7C": Card(suit=Suit.CLUBS, value=6),
-        "8S": Card(suit=Suit.SPADES, value=7),
-        "9H": Card(suit=Suit.HEARTS, value=8),
-        "TD": Card(suit=Suit.DIAMONDS, value=9),
-        "JC": Card(suit=Suit.CLUBS, value=10),
-        "QS": Card(suit=Suit.SPADES, value=11),
-        "KC": Card(suit=Suit.CLUBS, value=12),
+        "AH": Card(suit=Suit.HEARTS, value=FaceValue.ACE),
+        "2D": Card(suit=Suit.DIAMONDS, value=FaceValue.TWO),
+        "3C": Card(suit=Suit.CLUBS, value=FaceValue.THREE),
+        "4S": Card(suit=Suit.SPADES, value=FaceValue.FOUR),
+        "5H": Card(suit=Suit.HEARTS, value=FaceValue.FIVE),
+        "6D": Card(suit=Suit.DIAMONDS, value=FaceValue.SIX),
+        "7C": Card(suit=Suit.CLUBS, value=FaceValue.SEVEN),
+        "8S": Card(suit=Suit.SPADES, value=FaceValue.EIGHT),
+        "9H": Card(suit=Suit.HEARTS, value=FaceValue.NINE),
+        "TD": Card(suit=Suit.DIAMONDS, value=FaceValue.TEN),
+        "JC": Card(suit=Suit.CLUBS, value=FaceValue.JACK),
+        "QS": Card(suit=Suit.SPADES, value=FaceValue.QUEEN),
+        "KC": Card(suit=Suit.CLUBS, value=FaceValue.KING),
     }
 
     for string, card in examples.items():

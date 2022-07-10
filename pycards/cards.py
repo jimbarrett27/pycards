@@ -29,6 +29,34 @@ FACE_VALUE_TO_STR = {
 
 STR_TO_FACE_VALUE = {s: v for v, s in FACE_VALUE_TO_STR.items()}
 
+class FaceValue(Enum):
+
+    ACE = 0
+    TWO = 1
+    THREE = 2
+    FOUR = 3
+    FIVE = 4
+    SIX = 5
+    SEVEN = 6
+    EIGHT = 7
+    NINE = 8
+    TEN = 9
+    JACK = 10
+    QUEEN = 11
+    KING = 12
+
+    def single_letter_rep(self):
+
+        return FACE_VALUE_TO_STR[self.value]
+
+    def __lt__(self, other):
+
+        return self.value < other.value
+
+    def __sub__(self, other):
+
+        return self.value - other.value
+
 
 class Suit(Enum):
     """
@@ -65,7 +93,7 @@ class Card:
     """
 
     suit: Suit
-    value: int
+    value: FaceValue
 
     def __lt__(self, other):
         """
@@ -74,7 +102,7 @@ class Card:
         return self.value < other.value
 
     def __repr__(self):
-        return f"{FACE_VALUE_TO_STR[self.value]}{self.suit.name[0]}"
+        return f"{self.value.single_letter_rep()}{self.suit.name[0]}"
 
     def __hash__(self):
         return self.suit.__hash__() + self.value.__hash__()
@@ -94,7 +122,7 @@ class Card:
         if len(card_str) != 2:
             raise ValueError(f"The card string {card_str} is in the wrong format")
 
-        value = STR_TO_FACE_VALUE[card_str[0].upper()]
+        value = FaceValue(STR_TO_FACE_VALUE[card_str[0].upper()])
         suit = Suit.from_string(card_str[1].upper())
 
         return cls(suit=suit, value=value)
@@ -114,15 +142,18 @@ class Cards:
     def __getitem__(self, key):
         return self.cards[key]
 
+    def __add__(self, other):
+        
+        if isinstance(other, Card):
+            return Cards(self.cards + [other])
+        elif isinstance(other, Cards):
+            return Cards(self.cards + other.cards)
+
+        raise TypeError(f"Can't add object of type {type(other)} to cards")        
+
     def __iadd__(self, other):
 
-        if isinstance(other, Card):
-            self.cards.append(other)
-        elif isinstance(other, Cards):
-            self.cards += other
-        else:
-            raise TypeError(f"Can't append object of type {type(other)} to cards")
-
+        self = self + other
         return self
 
     def __repr__(self) -> str:
@@ -218,7 +249,7 @@ class Cards:
         for card in self.cards:
             val_to_cards[card.value].append(card)
 
-        vals = np.sort(list(val_to_cards))
+        vals = sorted(list(val_to_cards))
         diffs = np.diff(vals)
 
         runs = []
@@ -259,7 +290,7 @@ class Cards:
 
         cards = []
         for suit in Suit:
-            for value in range(13):
+            for value in FaceValue:
                 cards.append(Card(suit, value))
 
         if shuffle:

@@ -7,14 +7,14 @@ from itertools import combinations
 
 import numpy as np
 
-from pycards.cards import Card, Cards
+from pycards.cards import Card, Cards, FaceValue
 from pycards.players import Player, Players
 
 
 def _cribbage_card_value(card: Card):
 
-    if card.value < 9:
-        return card.value + 1
+    if card.value < FaceValue.TEN:
+        return card.value.value + 1
 
     return 10
 
@@ -127,11 +127,12 @@ class Cribbage:
         """
         if n_required_cards > len(self.deal_pile):
             self.discard_pile.shuffle()
-            self.deal_pile += self.discard_pile
+            self.deal_pile += self.discard_pile.play_all()
 
     def _deal_cards_to_players(self):
 
         n_required_cards = self.n_players * self.cards_per_player
+
         self._fix_deal_pile(n_required_cards)
 
         for player in self.players:
@@ -170,7 +171,7 @@ class Cribbage:
 
         # look for knobs
         for card in hand:
-            if card.value == 10 and card.suit == self.turn_up_card.suit:
+            if card.value == FaceValue.JACK and card.suit == self.turn_up_card.suit:
                 hand_score += 1
 
         return hand_score
@@ -227,7 +228,6 @@ class Cribbage:
             self.discard_pile += player.hand.play_all()
 
         self.discard_pile += self.crib.play_all()
-        self.discard_pile += self.turn_up_card
 
     def play(self):
         """
@@ -252,3 +252,4 @@ class Cribbage:
                     return winner_or_none
 
             self._discard_hands_and_crib()
+            self.discard_pile += self.turn_up_card
