@@ -68,7 +68,12 @@ def test_deal_cards_to_players():
         assert len(game.deal_pile) == len(set(game.deal_pile))
         assert len(game.discard_pile) == len(set(game.discard_pile))
 
-        all_cards = game.deal_pile + game.discard_pile + game.players[0].hand + game.players[1].hand
+        all_cards = (
+            game.deal_pile
+            + game.discard_pile
+            + game.players[0].hand
+            + game.players[1].hand
+        )
         assert len(all_cards) == len(set(all_cards))
         assert set(all_cards) == set(Cards.standard_deck())
 
@@ -76,5 +81,4 @@ def test_deal_cards_to_players():
             assert len(player.hand) == game.cards_per_player
             assert len(player.hand) == len(set(player.hand))
 
-        
         game._discard_hands_and_crib()

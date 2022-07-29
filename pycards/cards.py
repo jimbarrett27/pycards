@@ -29,6 +29,7 @@ FACE_VALUE_TO_STR = {
 
 STR_TO_FACE_VALUE = {s: v for v, s in FACE_VALUE_TO_STR.items()}
 
+
 class FaceValue(Enum):
 
     ACE = 0
@@ -143,7 +144,7 @@ class Cards:
         return self.cards[key]
 
     def __add__(self, other):
-        
+
         if isinstance(other, Card):
             return Cards(self.cards + [other])
         elif isinstance(other, Cards):

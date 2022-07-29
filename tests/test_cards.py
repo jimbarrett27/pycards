@@ -9,7 +9,7 @@ import numpy as np
 import pytest
 from hypothesis import given
 
-from pycards.cards import Card, Cards, Suit, FaceValue
+from pycards.cards import Card, Cards, FaceValue, Suit
 
 
 @st.composite

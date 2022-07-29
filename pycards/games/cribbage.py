@@ -192,7 +192,7 @@ class Cribbage:
             self.crib += self.deal_pile.deal_card()
 
     def _choose_turn_up(self):
-        
+
         self._fix_deal_pile(n_required_cards=1)
         self.turn_up_card = self.deal_pile.play_random_card()
         self.discard_pile += self.turn_up_card
