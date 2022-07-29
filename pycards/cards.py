@@ -31,6 +31,9 @@ STR_TO_FACE_VALUE = {s: v for v, s in FACE_VALUE_TO_STR.items()}
 
 
 class FaceValue(Enum):
+    """
+    Enum for the card face values
+    """
 
     ACE = 0
     TWO = 1
@@ -46,8 +49,10 @@ class FaceValue(Enum):
     QUEEN = 11
     KING = 12
 
-    def single_letter_rep(self):
-
+    def single_char_rep(self):
+        """
+        Returns a 1 character representation of the face value
+        """
         return FACE_VALUE_TO_STR[self.value]
 
     def __lt__(self, other):
@@ -103,7 +108,7 @@ class Card:
         return self.value < other.value
 
     def __repr__(self):
-        return f"{self.value.single_letter_rep()}{self.suit.name[0]}"
+        return f"{self.value.single_char_rep()}{self.suit.name[0]}"
 
     def __hash__(self):
         return self.suit.__hash__() + self.value.__hash__()
@@ -147,7 +152,7 @@ class Cards:
 
         if isinstance(other, Card):
             return Cards(self.cards + [other])
-        elif isinstance(other, Cards):
+        if isinstance(other, Cards):
             return Cards(self.cards + other.cards)
 
         raise TypeError(f"Can't add object of type {type(other)} to cards")
