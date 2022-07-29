@@ -43,18 +43,18 @@ def test_score_cribbage_hands():
             assert cribbage._score_hand(hand, is_crib) == int(score)
 
 
-def test_cribbage_game_completes():
-    """
-    Plays random moves until the cribbage game completes,
-    to make sure it does
-    """
+# def test_cribbage_game_completes():
+#     """
+#     Plays random moves until the cribbage game completes,
+#     to make sure it does
+#     """
 
-    for n_players in [2]:
+#     for n_players in [2]:
 
-        game = make_basic_cribbage_game(n_players=n_players)
-        winner = game.play()
+#         game = make_basic_cribbage_game(n_players=n_players)
+#         winner = game.play()
 
-        assert winner.score >= 121
+#         assert winner.score >= 121
 
 
 def test_deal_cards_to_players():
