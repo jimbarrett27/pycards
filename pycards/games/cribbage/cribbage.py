@@ -2,81 +2,17 @@
 Rules for the game of Cribbage
 """
 
-from asyncio.log import logger
 from copy import deepcopy
 from itertools import combinations
 from logging import getLogger
-from webbrowser import get
 
 import numpy as np
 
-from pycards.cards import Card, Cards, FaceValue
+from pycards.cards import Cards, FaceValue
+from pycards.games.cribbage.util import cribbage_card_value
 from pycards.players import Player, Players
 
 LOGGER = getLogger(__file__)
-
-
-def _cribbage_card_value(card: Card):
-
-    if card.value < FaceValue.TEN:
-        return card.value.value + 1
-
-    return 10
-
-
-class CribbagePlayer(Player):
-    """
-    Child class of PLayer to add cribbage specific functionality
-    """
-
-    pegging_hand: Cards
-
-    def can_peg(self, pegged_cards: Cards):
-        """
-        If the player can go in the pegging phase
-        """
-
-        if len(self.pegging_hand) == 0:
-            return False
-
-        min_value = min(map(_cribbage_card_value, self.pegging_hand))
-        current_pegging_score = sum(map(_cribbage_card_value, pegged_cards))
-
-        if current_pegging_score + min_value > 31:
-            return False
-
-        return True
-
-    def give_cards_to_crib(self, n_required):
-        """
-        Choose which cards to give to the crib
-        """
-
-        LOGGER.debug(f"player {self.name} playing cards to crib")
-
-        if n_required not in {1, 2}:
-            raise ValueError("Requested weird number of cards for crib")
-
-        cards_to_play = Cards(
-            np.random.choice(self.hand, size=n_required, replace=False)
-        )
-        return self.hand.play_cards(cards_to_play)
-
-    def play_pegging_card(self, pegged_cards: Cards):  # pylint: disable=unused-argument
-        """
-        Choose a card from the players hand to play during the
-        pegging phase.
-
-        Requires the current pegging score.
-        """
-
-        min_card_value = min(map(_cribbage_card_value, self.pegging_hand))
-
-        for card in self.pegging_hand:
-            if _cribbage_card_value(card) == min_card_value:
-                return self.pegging_hand.play_card(card)
-
-        raise ValueError("No valid pegging card")
 
 
 class Cribbage:
@@ -159,7 +95,7 @@ class Cribbage:
         # look for 15s
         for n_cards in [2, 3, 4, 5]:
             for cards in combinations(effective_hand, n_cards):
-                if sum(_cribbage_card_value(card) for card in cards) == 15:
+                if sum(cribbage_card_value(card) for card in cards) == 15:
                     hand_score += 2
 
         # look for pairs
