@@ -2,14 +2,19 @@
 Rules for the game of Cribbage
 """
 
+from asyncio.log import logger
 from copy import deepcopy
 from itertools import combinations
+from webbrowser import get
 
 import numpy as np
 
 from pycards.cards import Card, Cards, FaceValue
 from pycards.players import Player, Players
 
+from logging import getLogger
+
+LOGGER = getLogger(__file__)
 
 def _cribbage_card_value(card: Card):
 
@@ -46,6 +51,8 @@ class CribbagePlayer(Player):
         """
         Choose which cards to give to the crib
         """
+
+        LOGGER.debug(f"player {self.name} playing cards to crib")
 
         if n_required not in {1, 2}:
             raise ValueError("Requested weird number of cards for crib")
@@ -209,7 +216,7 @@ class Cribbage:
         for player in self.players:
             player.pegging_hand = deepcopy(player.hand)
 
-        while any(len(player.hand) for player in self.players):
+        while any(len(player.pegging_hand) for player in self.players):
 
             pegged_cards = Cards.empty()
             while any(player.can_peg(pegged_cards) for player in self.players):
@@ -243,8 +250,13 @@ class Cribbage:
 
         i = 0
         while i < 1000:
+
+            LOGGER.info(f"Starting turn {i+1}. Player scores are {[player.score for player in self.players]}")
+
+            LOGGER.info(f"Dealing cards")
             self._deal_cards_to_players()
 
+            LOGGER.info(f"Receiving crib cards")
             self._receive_crib_cards_from_players()
 
             for scoring_phase in (
@@ -252,11 +264,15 @@ class Cribbage:
                 self._play_pegging_phase,
                 self._score_hands,
             ):
+                LOGGER.info(f"Starting scoring phase {scoring_phase.__name__}")
+            
                 scoring_phase()
 
                 winner_or_none = self._find_winner()
                 if winner_or_none is not None:
                     return winner_or_none
+
+            LOGGER.info("Discarding players' cards")
 
             self._discard_hands_and_crib()
 
