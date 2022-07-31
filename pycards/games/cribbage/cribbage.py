@@ -4,72 +4,15 @@ Rules for the game of Cribbage
 
 from copy import deepcopy
 from itertools import combinations
+from logging import getLogger
 
 import numpy as np
 
-from pycards.cards import Card, Cards, FaceValue
+from pycards.cards import Cards, FaceValue
+from pycards.games.cribbage.util import cribbage_card_value
 from pycards.players import Player, Players
 
-
-def _cribbage_card_value(card: Card):
-
-    if card.value < FaceValue.TEN:
-        return card.value.value + 1
-
-    return 10
-
-
-class CribbagePlayer(Player):
-    """
-    Child class of PLayer to add cribbage specific functionality
-    """
-
-    pegging_hand: Cards
-
-    def can_peg(self, pegged_cards: Cards):
-        """
-        If the player can go in the pegging phase
-        """
-
-        if len(self.pegging_hand) == 0:
-            return False
-
-        min_value = min(map(_cribbage_card_value, self.pegging_hand))
-        current_pegging_score = sum(map(_cribbage_card_value, pegged_cards))
-
-        if current_pegging_score + min_value > 31:
-            return False
-
-        return True
-
-    def give_cards_to_crib(self, n_required):
-        """
-        Choose which cards to give to the crib
-        """
-
-        if n_required not in {1, 2}:
-            raise ValueError("Requested weird number of cards for crib")
-
-        cards_to_play = Cards(
-            np.random.choice(self.hand, size=n_required, replace=False)
-        )
-        return self.hand.play_cards(cards_to_play)
-
-    def play_pegging_card(self, pegged_cards: Cards):  # pylint: disable=unused-argument
-        """
-        Choose a card from the players hand to play during the
-        pegging phase.
-
-        Requires the current pegging score.
-        """
-
-        min_card_value = min(map(_cribbage_card_value, self.pegging_hand))
-
-        for card in self.pegging_hand:
-            if _cribbage_card_value(card) == min_card_value:
-                return self.pegging_hand.play_card(card)
-
-        raise ValueError("No valid pegging card")
+LOGGER = getLogger(__file__)
 
 
 class Cribbage:
@@ -152,7 +95,7 @@ class Cribbage:
         # look for 15s
         for n_cards in [2, 3, 4, 5]:
             for cards in combinations(effective_hand, n_cards):
-                if sum(_cribbage_card_value(card) for card in cards) == 15:
+                if sum(cribbage_card_value(card) for card in cards) == 15:
                     hand_score += 2
 
         # look for pairs
@@ -209,7 +152,7 @@ class Cribbage:
         for player in self.players:
             player.pegging_hand = deepcopy(player.hand)
 
-        while any(len(player.hand) for player in self.players):
+        while any(len(player.pegging_hand) for player in self.players):
 
             pegged_cards = Cards.empty()
             while any(player.can_peg(pegged_cards) for player in self.players):
@@ -243,20 +186,35 @@ class Cribbage:
 
         i = 0
         while i < 1000:
+
+            LOGGER.info(
+                f"Starting turn {i+1}. "
+                f"Player scores are {[player.score for player in self.players]}"
+            )
+
+            LOGGER.info("Dealing cards")
             self._deal_cards_to_players()
 
+            LOGGER.info("Receiving crib cards")
             self._receive_crib_cards_from_players()
+            LOGGER.info("Crib cards received")
 
             for scoring_phase in (
                 self._choose_turn_up,
                 self._play_pegging_phase,
                 self._score_hands,
             ):
+                LOGGER.info(f"Starting scoring phase {scoring_phase.__name__}")
+
                 scoring_phase()
 
                 winner_or_none = self._find_winner()
                 if winner_or_none is not None:
                     return winner_or_none
+
+                LOGGER.info(f"Finishing scoring phase {scoring_phase.__name__}")
+
+            LOGGER.info("Discarding players' cards")
 
             self._discard_hands_and_crib()
 

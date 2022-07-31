@@ -3,7 +3,8 @@
 import csv
 
 from pycards.cards import Card, Cards
-from pycards.games.cribbage import Cribbage, CribbagePlayer
+from pycards.games.cribbage.cribbage import Cribbage
+from pycards.games.cribbage.players import RandomCribbagePlayer
 from pycards.players import Players
 from pycards.util import get_repo_root
 
@@ -12,10 +13,10 @@ def make_basic_cribbage_game(n_players: int):
 
     players = Players(
         [
-            CribbagePlayer(is_dealer=True, name="Alice", seat_position=1),
-            CribbagePlayer(is_dealer=False, name="Bob", seat_position=2),
-            CribbagePlayer(is_dealer=False, name="Charlie", seat_position=3),
-            CribbagePlayer(is_dealer=False, name="Dave", seat_position=4),
+            RandomCribbagePlayer(is_dealer=True, name="Alice", seat_position=1),
+            RandomCribbagePlayer(is_dealer=False, name="Bob", seat_position=2),
+            RandomCribbagePlayer(is_dealer=False, name="Charlie", seat_position=3),
+            RandomCribbagePlayer(is_dealer=False, name="Dave", seat_position=4),
         ][:n_players]
     )
 
@@ -43,18 +44,18 @@ def test_score_cribbage_hands():
             assert cribbage._score_hand(hand, is_crib) == int(score)
 
 
-# def test_cribbage_game_completes():
-#     """
-#     Plays random moves until the cribbage game completes,
-#     to make sure it does
-#     """
+def test_cribbage_game_completes():
+    """
+    Plays random moves until the cribbage game completes,
+    to make sure it does
+    """
 
-#     for n_players in [2]:
+    for n_players in [2, 3, 4]:
 
-#         game = make_basic_cribbage_game(n_players=n_players)
-#         winner = game.play()
+        game = make_basic_cribbage_game(n_players=n_players)
+        winner = game.play()
 
-#         assert winner.score >= 121
+        assert winner.score >= 121
 
 
 def test_deal_cards_to_players():

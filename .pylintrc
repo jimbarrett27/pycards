@@ -13,7 +13,7 @@ good-names=i,
 
 
 [MESSAGES CONTROL]
-disable = 
+disable = logging-fstring-interpolation
 
 [format]
 max-line-length = 88
