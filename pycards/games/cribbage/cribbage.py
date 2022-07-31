@@ -188,14 +188,16 @@ class Cribbage:
         while i < 1000:
 
             LOGGER.info(
-                f"Starting turn {i+1}. Player scores are {[player.score for player in self.players]}"
+                f"Starting turn {i+1}. "
+                f"Player scores are {[player.score for player in self.players]}"
             )
 
-            LOGGER.info(f"Dealing cards")
+            LOGGER.info("Dealing cards")
             self._deal_cards_to_players()
 
-            LOGGER.info(f"Receiving crib cards")
+            LOGGER.info("Receiving crib cards")
             self._receive_crib_cards_from_players()
+            LOGGER.info("Crib cards received")
 
             for scoring_phase in (
                 self._choose_turn_up,
@@ -209,6 +211,8 @@ class Cribbage:
                 winner_or_none = self._find_winner()
                 if winner_or_none is not None:
                     return winner_or_none
+
+                LOGGER.info(f"Finishing scoring phase {scoring_phase.__name__}")
 
             LOGGER.info("Discarding players' cards")
 

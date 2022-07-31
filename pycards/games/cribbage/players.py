@@ -1,3 +1,7 @@
+"""
+The different cribbage player innterfaces
+"""
+
 import numpy as np
 
 from pycards.cards import Cards
@@ -31,15 +35,25 @@ class CribbagePlayer(Player):
         return True
 
     def give_cards_to_crib(self, n_required: int):
+        """
+        Asbtract function, representing the strategy of giving cards to the crib
+        """
 
         raise NotImplementedError()
 
     def play_pegging_card(self, pegged_cards: Cards):
+        """
+        Asbtract function, representing the strategy of giving cards to the crib
+        """
 
         raise NotImplementedError()
 
 
 class RandomCribbagePlayer(CribbagePlayer):
+    """
+    Plays random valid cards, for quick testing purposes
+    """
+
     def give_cards_to_crib(self, n_required):
         """
         Choose which cards to give to the crib
