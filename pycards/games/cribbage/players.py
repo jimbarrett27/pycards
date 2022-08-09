@@ -4,8 +4,8 @@ The different cribbage player innterfaces
 
 import numpy as np
 
-from pycards.cards import Cards
-from pycards.games.cribbage.util import cribbage_card_value
+from pycards.cards import Cards, Card
+from pycards.games.cribbage.util import cribbage_card_value, compute_current_pegging_score
 from pycards.players import Player
 
 
@@ -27,21 +27,20 @@ class CribbagePlayer(Player):
             return False
 
         min_value = min(map(cribbage_card_value, self.pegging_hand))
-        current_pegging_score = sum(map(cribbage_card_value, pegged_cards))
-
+        current_pegging_score = compute_current_pegging_score(pegged_cards)
         if current_pegging_score + min_value > 31:
             return False
 
         return True
 
-    def give_cards_to_crib(self, n_required: int):
+    def give_cards_to_crib(self, n_required: int) -> Cards:
         """
         Asbtract function, representing the strategy of giving cards to the crib
         """
 
         raise NotImplementedError()
 
-    def play_pegging_card(self, pegged_cards: Cards):
+    def play_pegging_card(self, pegged_cards: Cards) -> Card:
         """
         Asbtract function, representing the strategy of giving cards to the crib
         """
@@ -54,7 +53,7 @@ class RandomCribbagePlayer(CribbagePlayer):
     Plays random valid cards, for quick testing purposes
     """
 
-    def give_cards_to_crib(self, n_required):
+    def give_cards_to_crib(self, n_required) -> Cards:
         """
         Choose which cards to give to the crib
         """
@@ -67,7 +66,7 @@ class RandomCribbagePlayer(CribbagePlayer):
         )
         return self.hand.play_cards(cards_to_play)
 
-    def play_pegging_card(self, pegged_cards: Cards):  # pylint: disable=unused-argument
+    def play_pegging_card(self, pegged_cards: Cards) -> Card:  # pylint: disable=unused-argument
         """
         Choose a card from the players hand to play during the
         pegging phase.
@@ -82,3 +81,43 @@ class RandomCribbagePlayer(CribbagePlayer):
                 return self.pegging_hand.play_card(card)
 
         raise ValueError("No valid pegging card")
+
+class CommandLinePlayer(CribbagePlayer):
+
+    def give_cards_to_crib(self, n_required: int) -> Cards:
+
+        print(f"Your current hand is\n{self.hand}")
+
+        while True:
+            try:
+                cards = Cards.from_string(input(f"Choose {n_required} cards for the crib"))
+                if len(cards) != n_required:
+                    print('Wrong number of cards chosen')
+                    continue
+                if set(cards) & self.hand != n_required:
+                    print('Cards not in you hand')
+                    continue
+                break
+            except ValueError:
+                print('Not a valid card, try again')
+
+        return cards
+
+    def play_pegging_card(self, pegged_cards: Cards) -> Card:
+
+        print(f"The pegging sequence so far is;")
+        print(f"Your cards available for pegging are {self.pegging_hand}")
+
+        current_pegging_total = compute_current_pegging_score(pegged_cards)
+        while True:
+            try:
+                card = Card.from_string(input(f"Choose card to play"))
+                if card not in self.hand:
+                    print('Card not in you hand')
+                if cribbage_card_value(card) + current_pegging_total > 31:
+                    print('That would exceed 31')
+                break
+            except ValueError:
+                print('Not a valid card, try again')
+
+        return card

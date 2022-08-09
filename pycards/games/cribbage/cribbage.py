@@ -9,7 +9,7 @@ from logging import getLogger
 import numpy as np
 
 from pycards.cards import Cards, FaceValue
-from pycards.games.cribbage.util import cribbage_card_value
+from pycards.games.cribbage.util import cribbage_card_value, compute_current_pegging_score
 from pycards.players import Player, Players
 
 LOGGER = getLogger(__file__)
@@ -140,8 +140,10 @@ class Cribbage:
         self.turn_up_card = self.deal_pile.play_random_card()
         self.discard_pile += self.turn_up_card
 
+        LOGGER.info(f'turn up card is {self.turn_up_card}')
         if self.turn_up_card.value == FaceValue.JACK:
             self.players.dealer.score += 2
+            LOGGER.info(f'{self.players.dealer.name} score 2 points for that')
 
         return self._find_winner()
 
@@ -160,17 +162,32 @@ class Cribbage:
                 player = next(player_order_gen)
 
                 if player.can_peg(pegged_cards):
-                    pegged_cards += player.play_pegging_card(pegged_cards)
+                    pegging_card_played = player.play_pegging_card(pegged_cards)
+                    pegged_cards += pegging_card_played
+                    current_pegging_score = compute_current_pegging_score(pegged_cards)
+                    LOGGER.info(f'{player.name} played {pegging_card_played}. The new pegging total is {current_pegging_score}')
 
                 if self._find_winner():
                     return True
 
         return False
 
-    def _score_hands(self):
+    def _score_hands(self) -> None:
 
+        LOGGER.info(f"The turnup card is {self.turn_up_card}")
         for player in self.players:
-            player.score += self._score_hand(player.hand)
+            score = self._score_hand(player.hand)
+            player.score += score
+            LOGGER.info(f'{player.name} has ({player.hand}) scoring {score}. Their total is {player.score}')
+            if self._find_winner() is not None:
+                return
+
+    def _score_crib(self):
+
+        dealer = self.players.dealer
+        crib_score = self._score_hand(self.crib)
+        dealer.score += crib_score
+        LOGGER.info(f"{dealer.name} has crib ({self.crib}) scoring {crib_score}. Their total is {dealer.score}")
 
     def _discard_hands_and_crib(self):
 
@@ -203,6 +220,7 @@ class Cribbage:
                 self._choose_turn_up,
                 self._play_pegging_phase,
                 self._score_hands,
+                self._score_crib
             ):
                 LOGGER.info(f"Starting scoring phase {scoring_phase.__name__}")
 
@@ -215,9 +233,8 @@ class Cribbage:
                 LOGGER.info(f"Finishing scoring phase {scoring_phase.__name__}")
 
             LOGGER.info("Discarding players' cards")
-
             self._discard_hands_and_crib()
 
             i += 1
 
-        raise TimeoutError("Too many turns")
+        raise TimeoutError("Too many turns taken")
