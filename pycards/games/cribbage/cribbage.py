@@ -157,13 +157,15 @@ class Cribbage:
         while any(len(player.pegging_hand) for player in self.players):
 
             pegged_cards = Cards.empty()
-            while any(player.can_peg(pegged_cards) for player in self.players):
+            players_can_peg = [player.can_peg(pegged_cards) for player in self.players]
+            while any(players_can_peg):
 
                 player = next(player_order_gen)
 
                 if player.can_peg(pegged_cards):
                     pegging_card_played = player.play_pegging_card(pegged_cards)
                     pegged_cards += pegging_card_played
+
                     current_pegging_score = compute_current_pegging_score(pegged_cards)
                     LOGGER.info(f'{player.name} played {pegging_card_played}. The new pegging total is {current_pegging_score}')
 
@@ -204,10 +206,9 @@ class Cribbage:
         i = 0
         while i < 1000:
 
-            LOGGER.info(
-                f"Starting turn {i+1}. "
-                f"Player scores are {[player.score for player in self.players]}"
-            )
+            LOGGER.info(f"Starting turn {i+1}.")
+            LOGGER.info(f"Player scores are {[player.score for player in self.players]}")
+            LOGGER.info(f"The dealer is {self.players.dealer.name}")
 
             LOGGER.info("Dealing cards")
             self._deal_cards_to_players()
@@ -234,6 +235,8 @@ class Cribbage:
 
             LOGGER.info("Discarding players' cards")
             self._discard_hands_and_crib()
+
+            self.players.permute_dealer()
 
             i += 1
 

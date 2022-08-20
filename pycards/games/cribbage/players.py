@@ -90,18 +90,18 @@ class CommandLinePlayer(CribbagePlayer):
 
         while True:
             try:
-                cards = Cards.from_string(input(f"Choose {n_required} cards for the crib"))
+                cards = Cards.from_string(input(f"Choose {n_required} cards for the crib\n"))
                 if len(cards) != n_required:
                     print('Wrong number of cards chosen')
                     continue
-                if set(cards) & self.hand != n_required:
+                if sum(card in self.hand for card in cards) != n_required:
                     print('Cards not in you hand')
                     continue
                 break
             except ValueError:
                 print('Not a valid card, try again')
 
-        return cards
+        return self.hand.play_cards(cards)
 
     def play_pegging_card(self, pegged_cards: Cards) -> Card:
 
@@ -111,13 +111,15 @@ class CommandLinePlayer(CribbagePlayer):
         current_pegging_total = compute_current_pegging_score(pegged_cards)
         while True:
             try:
-                card = Card.from_string(input(f"Choose card to play"))
-                if card not in self.hand:
+                card = Card.from_string(input(f"Choose card to play\n"))
+                if card not in self.pegging_hand:
                     print('Card not in you hand')
+                    continue
                 if cribbage_card_value(card) + current_pegging_total > 31:
                     print('That would exceed 31')
+                    continue
                 break
             except ValueError:
                 print('Not a valid card, try again')
 
-        return card
+        return self.pegging_hand.play_card(card)
