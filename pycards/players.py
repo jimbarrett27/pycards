@@ -70,7 +70,7 @@ class Players:
             else:
                 player.is_dealer = False
 
-    def _permute_dealer(self):
+    def permute_dealer(self):
         """
         Moves the dealer to the next player
         """

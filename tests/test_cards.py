@@ -88,13 +88,13 @@ def test_flushes():
 
 def test_straights():
 
-    # check we find the flush
+    # check we find the straight
     example_hand = Cards.from_string("AH 2H 3H 4H")
     assert example_hand.contains_straight(4)
     assert len(example_hand.get_straights(4, 4)) == 1
     assert example_hand.get_straights(4, 4)[0] == example_hand
 
-    # check we don't count the sub-flushes
+    # check we don't count the sub-straights
     assert len(example_hand.get_straights(2, 4)) == 1
 
     # check we find straights smaller than max length

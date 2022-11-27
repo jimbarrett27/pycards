@@ -83,3 +83,27 @@ def test_deal_cards_to_players():
             assert len(player.hand) == len(set(player.hand))
 
         game._discard_hands_and_crib()
+
+def test_score_pegging_sequence():
+
+    repo_root = get_repo_root()
+    example_hands_file = repo_root / "tests/data/cribbage_pegging_sequences.csv"
+
+    with example_hands_file.open() as f:
+        reader = csv.reader(f)
+        f.readline()
+
+        for cards_str, last_card, score_sequence in reader:
+
+            cards = Cards.from_string(cards_str)
+            last_card = last_card == '1'
+            correct_score_sequence = list(map(int,score_sequence.split(',')))
+
+            score_sequence = []
+            for i in range(len(cards)):
+                # only pass in last card when its actuall the last card
+                last_card_played = last_card and i == len(cards) - 1
+                score_sequence.append(Cribbage.score_pegging_contribution(cards[:i+1], last_card_played))
+
+            print(cards)
+            assert score_sequence == correct_score_sequence

@@ -2,7 +2,7 @@
 Util functions for cribbage
 """
 
-from pycards.cards import Card, FaceValue
+from pycards.cards import Card, Cards, FaceValue
 
 
 def cribbage_card_value(card: Card):
@@ -14,3 +14,10 @@ def cribbage_card_value(card: Card):
         return card.value.value + 1
 
     return 10
+
+
+def sum_cribbage_card_values(cards: Cards):
+    """
+    Sums the (cribbage) values of the cards
+    """
+    return sum(map(cribbage_card_value, cards))

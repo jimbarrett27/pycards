@@ -46,7 +46,7 @@ def test_permute_dealer():
         assert sum(player.is_dealer for player in players) == 1
 
         initial_dealer = players.dealer
-        players._permute_dealer()
+        players.permute_dealer()
 
         # check the dealer changed, and there's still only 1
         assert not initial_dealer.is_dealer
@@ -56,7 +56,7 @@ def test_permute_dealer():
         # check that the dealer loops round, and there is
         # only ever one
         for _ in range(n_players - 1):
-            players._permute_dealer()
+            players.permute_dealer()
             assert sum(player.is_dealer for player in players) == 1
 
         assert initial_dealer.is_dealer
