@@ -49,7 +49,7 @@ class FaceValue(Enum):
     QUEEN = 11
     KING = 12
 
-    def single_char_rep(self):
+    def single_char_rep(self) -> str:
         """
         Returns a 1 character representation of the face value
         """

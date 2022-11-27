@@ -25,6 +25,32 @@ def cards_strategy(draw):
     return Cards(cards)
 
 
+def test_face_value_single_character_rep():
+
+    for f in FaceValue:
+        as_single_char = f.single_char_rep()
+        assert isinstance(as_single_char, str)
+        assert len(as_single_char) == 1
+
+def test_face_value_comparison():
+
+    # make sure we can sort the whole list
+    sorted(FaceValue)
+
+    # make sure ace is less than everything
+    for fv in FaceValue:
+        if fv is fv.ACE:
+            continue
+        assert FaceValue.ACE < fv
+
+    # make sure king is greater than everything
+    for fv in FaceValue:
+        if fv is fv.KING:
+            continue
+        assert FaceValue.KING > fv
+
+
+
 def test_card_from_string():
 
     examples = {
