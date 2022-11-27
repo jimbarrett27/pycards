@@ -7,7 +7,7 @@ from collections import Counter, defaultdict
 from dataclasses import dataclass
 from enum import Enum
 from itertools import product
-from typing import List
+from typing import List, Union
 
 import numpy as np
 
@@ -145,8 +145,15 @@ class Cards:
     def __len__(self):
         return len(self.cards)
 
-    def __getitem__(self, key):
-        return self.cards[key]
+    def __getitem__(self, key) -> Union[Card, "Cards"]:
+
+        if isinstance(key, (int, np.integer)):
+            return self.cards[key]
+        elif isinstance(key, slice):
+            return Cards(self.cards[key])
+        
+        raise TypeError("Invalid type passed to Cards __getitem__") 
+
 
     def __add__(self, other):
 

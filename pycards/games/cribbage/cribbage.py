@@ -146,6 +146,42 @@ class Cribbage:
             LOGGER.info(f'{self.players.dealer.name} score 2 points for that')
 
         return self._find_winner()
+    
+    @staticmethod
+    def score_pegging_contribution(pegged_cards: Cards, last_card: bool):
+
+        score = 0
+        
+        # score multiples
+        card_values = [card.value for card in pegged_cards]
+        if len(set(card_values[-4:])) == 1:
+            score += 12
+        elif len(set(card_values[-3:])) == 1:
+            score += 6
+        elif len(set(card_values[-2:])) == 1:
+            score += 2
+        
+        # score runs
+        for i in range(len(pegged_cards)-2):
+            if pegged_cards[i:].contains_straight(len(pegged_cards)-i):
+                score += len(pegged_cards)-i
+                break
+
+        current_pegging_total = sum_cribbage_card_values(pegged_cards)
+        # score 15
+        if current_pegging_total == 15:
+            score += 2
+
+        # score last card
+        if current_pegging_total == 31:
+            score += 2
+        elif last_card:
+            score += 1
+
+        return score
+
+    def _count_players_that_can_peg(self, pegged_cards: Cards):
+        return sum(player.can_peg(pegged_cards) for player in self.players)
 
     def _play_pegging_phase(self):
 
@@ -157,13 +193,17 @@ class Cribbage:
         while any(len(player.pegging_hand) > 0 for player in self.players):
 
             pegged_cards = Cards.empty()
-            while any(player.can_peg(pegged_cards) for player in self.players):
+            
+            while self._count_players_that_can_peg(pegged_cards) > 0:
 
                 player = next(player_order_gen)
 
                 if player.can_peg(pegged_cards):
                     pegging_card_played = player.play_pegging_card(pegged_cards)
                     pegged_cards += pegging_card_played
+
+                    last_card = self._count_players_that_can_peg(pegged_cards) == 0
+                    player.score += self.score_pegging_contribution(pegged_cards, last_card)
 
                     current_pegging_total = sum_cribbage_card_values(pegged_cards)
                     LOGGER.info(f'{player.name} played {pegging_card_played}. The new pegging total is {current_pegging_total}')
