@@ -154,11 +154,11 @@ class Cribbage:
         
         # score multiples
         card_values = [card.value for card in pegged_cards]
-        if len(set(card_values[-4:])) == 1:
+        if len(card_values) >= 4 and len(set(card_values[-4:])) == 1:
             score += 12
-        elif len(set(card_values[-3:])) == 1:
+        elif len(card_values) >= 3 and len(set(card_values[-3:])) == 1:
             score += 6
-        elif len(set(card_values[-2:])) == 1:
+        elif len(card_values) >= 2 and len(set(card_values[-2:])) == 1:
             score += 2
         
         # score runs
@@ -203,10 +203,14 @@ class Cribbage:
                     pegged_cards += pegging_card_played
 
                     last_card = self._count_players_that_can_peg(pegged_cards) == 0
-                    player.score += self.score_pegging_contribution(pegged_cards, last_card)
+                    scoring_contribution = self.score_pegging_contribution(pegged_cards, last_card)
+                    player.score += scoring_contribution
 
                     current_pegging_total = sum_cribbage_card_values(pegged_cards)
-                    LOGGER.info(f'{player.name} played {pegging_card_played}. The new pegging total is {current_pegging_total}')
+                    LOGGER.info(
+                        f'{player.name} played {pegging_card_played}, scoring {scoring_contribution}.'
+                        f' The new pegging total is {current_pegging_total}'
+                    )
                 else:
                     LOGGER.info(f"{player.name} can't go")
                     
