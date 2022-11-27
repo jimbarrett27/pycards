@@ -15,5 +15,9 @@ def cribbage_card_value(card: Card):
 
     return 10
 
+
 def sum_cribbage_card_values(cards: Cards):
+    """
+    Sums the (cribbage) values of the cards
+    """
     return sum(map(cribbage_card_value, cards))

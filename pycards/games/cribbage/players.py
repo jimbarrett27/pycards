@@ -4,7 +4,7 @@ The different cribbage player innterfaces
 
 import numpy as np
 
-from pycards.cards import Cards, Card
+from pycards.cards import Card, Cards
 from pycards.games.cribbage.util import cribbage_card_value, sum_cribbage_card_values
 from pycards.players import Player
 
@@ -66,7 +66,9 @@ class RandomCribbagePlayer(CribbagePlayer):
         )
         return self.hand.play_cards(cards_to_play)
 
-    def play_pegging_card(self, pegged_cards: Cards) -> Card:  # pylint: disable=unused-argument
+    def play_pegging_card(
+        self, pegged_cards: Cards
+    ) -> Card:  # pylint: disable=unused-argument
         """
         Choose a card from the players hand to play during the
         pegging phase.
@@ -82,7 +84,11 @@ class RandomCribbagePlayer(CribbagePlayer):
 
         raise ValueError("No valid pegging card")
 
+
 class CommandLinePlayer(CribbagePlayer):
+    """
+    Class to handle waiting for command line input from a player
+    """
 
     def give_cards_to_crib(self, n_required: int) -> Cards:
 
@@ -90,16 +96,18 @@ class CommandLinePlayer(CribbagePlayer):
 
         while True:
             try:
-                cards = Cards.from_string(input(f"Choose {n_required} cards for the crib\n"))
+                cards = Cards.from_string(
+                    input(f"Choose {n_required} cards for the crib\n")
+                )
                 if len(cards) != n_required:
-                    print('Wrong number of cards chosen')
+                    print("Wrong number of cards chosen")
                     continue
                 if sum(card in self.hand for card in cards) != n_required:
-                    print('Cards not in you hand')
+                    print("Cards not in you hand")
                     continue
                 break
             except ValueError:
-                print('Not a valid card, try again')
+                print("Not a valid card, try again")
 
         return self.hand.play_cards(cards)
 
@@ -111,15 +119,15 @@ class CommandLinePlayer(CribbagePlayer):
         current_pegging_total = sum_cribbage_card_values(pegged_cards)
         while True:
             try:
-                card = Card.from_string(input(f"Choose card to play\n"))
+                card = Card.from_string(input("Choose card to play\n"))
                 if card not in self.pegging_hand:
-                    print('Card not in you hand')
+                    print("Card not in you hand")
                     continue
                 if cribbage_card_value(card) + current_pegging_total > 31:
-                    print('That would exceed 31')
+                    print("That would exceed 31")
                     continue
                 break
             except ValueError:
-                print('Not a valid card, try again')
+                print("Not a valid card, try again")
 
         return self.pegging_hand.play_card(card)

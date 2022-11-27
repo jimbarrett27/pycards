@@ -149,11 +149,10 @@ class Cards:
 
         if isinstance(key, (int, np.integer)):
             return self.cards[key]
-        elif isinstance(key, slice):
+        if isinstance(key, slice):
             return Cards(self.cards[key])
-        
-        raise TypeError("Invalid type passed to Cards __getitem__") 
 
+        raise TypeError("Invalid type passed to Cards __getitem__")
 
     def __add__(self, other):
 
