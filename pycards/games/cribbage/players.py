@@ -5,7 +5,7 @@ The different cribbage player innterfaces
 import numpy as np
 
 from pycards.cards import Cards, Card
-from pycards.games.cribbage.util import cribbage_card_value, compute_current_pegging_score
+from pycards.games.cribbage.util import cribbage_card_value, sum_cribbage_card_values
 from pycards.players import Player
 
 
@@ -27,7 +27,7 @@ class CribbagePlayer(Player):
             return False
 
         min_value = min(map(cribbage_card_value, self.pegging_hand))
-        current_pegging_score = compute_current_pegging_score(pegged_cards)
+        current_pegging_score = sum_cribbage_card_values(pegged_cards)
         if current_pegging_score + min_value > 31:
             return False
 
@@ -105,10 +105,10 @@ class CommandLinePlayer(CribbagePlayer):
 
     def play_pegging_card(self, pegged_cards: Cards) -> Card:
 
-        print(f"The pegging sequence so far is;")
+        print(f"The pegging sequence so far is {pegged_cards}")
         print(f"Your cards available for pegging are {self.pegging_hand}")
 
-        current_pegging_total = compute_current_pegging_score(pegged_cards)
+        current_pegging_total = sum_cribbage_card_values(pegged_cards)
         while True:
             try:
                 card = Card.from_string(input(f"Choose card to play\n"))

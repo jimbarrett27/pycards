@@ -9,7 +9,7 @@ from logging import getLogger
 import numpy as np
 
 from pycards.cards import Cards, FaceValue
-from pycards.games.cribbage.util import cribbage_card_value, compute_current_pegging_score
+from pycards.games.cribbage.util import cribbage_card_value, sum_cribbage_card_values
 from pycards.players import Player, Players
 
 LOGGER = getLogger(__file__)
@@ -154,11 +154,10 @@ class Cribbage:
         for player in self.players:
             player.pegging_hand = deepcopy(player.hand)
 
-        while any(len(player.pegging_hand) for player in self.players):
+        while any(len(player.pegging_hand) > 0 for player in self.players):
 
             pegged_cards = Cards.empty()
-            players_can_peg = [player.can_peg(pegged_cards) for player in self.players]
-            while any(players_can_peg):
+            while any(player.can_peg(pegged_cards) for player in self.players):
 
                 player = next(player_order_gen)
 
@@ -166,9 +165,11 @@ class Cribbage:
                     pegging_card_played = player.play_pegging_card(pegged_cards)
                     pegged_cards += pegging_card_played
 
-                    current_pegging_score = compute_current_pegging_score(pegged_cards)
-                    LOGGER.info(f'{player.name} played {pegging_card_played}. The new pegging total is {current_pegging_score}')
-
+                    current_pegging_total = sum_cribbage_card_values(pegged_cards)
+                    LOGGER.info(f'{player.name} played {pegging_card_played}. The new pegging total is {current_pegging_total}')
+                else:
+                    LOGGER.info(f"{player.name} can't go")
+                    
                 if self._find_winner():
                     return True
 

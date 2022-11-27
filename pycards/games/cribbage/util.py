@@ -15,5 +15,5 @@ def cribbage_card_value(card: Card):
 
     return 10
 
-def compute_current_pegging_score(pegged_cards: Cards):
-    return sum(map(cribbage_card_value, pegged_cards))
+def sum_cribbage_card_values(cards: Cards):
+    return sum(map(cribbage_card_value, cards))
