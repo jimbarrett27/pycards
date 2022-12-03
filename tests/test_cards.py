@@ -4,25 +4,15 @@
 Test for the cards objects and associated methods
 """
 
-import hypothesis.strategies as st
 import numpy as np
 import pytest
 from hypothesis import given
 
 from pycards.cards import Card, Cards, FaceValue, Suit
+from tests.strategies import cards_strategy
 
 
-@st.composite
-def cards_strategy(draw):
-    """
-    Hypothesis strategy for cards
-    """
-    cards = draw(
-        st.lists(
-            st.sampled_from(sorted(Cards.standard_deck())), min_size=1, max_size=100
-        )
-    )
-    return Cards(cards)
+
 
 
 def test_card_from_string():
