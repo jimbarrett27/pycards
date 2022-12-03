@@ -108,6 +108,20 @@ def test_straights():
     assert example_hand.contains_straight(3)
     assert len(example_hand.get_straights(3, 3)) == 2
 
+    # check we don't loop straights round
+    example_hand = Cards.from_string("QH KH AH")
+    assert not example_hand.contains_straight(3)
+    assert len(example_hand.get_straights(3,3)) == 0
+
+    # check we get straights in reverse
+    example_hand = Cards.from_string("8D 7D 6D")
+    assert example_hand.contains_straight(3) is True
+    assert len(example_hand.get_straights(3, 4)) == 1
+
+    # check we get straights in out of order
+    example_hand = Cards.from_string("2D 5C 4S 3H")
+    assert example_hand.contains_straight(4) is True
+    assert len(example_hand.get_straights(4, 4)) == 1
 
 def test_deal_card():
 
@@ -172,3 +186,30 @@ def test_play_all(cards):
 
     assert len(cards) == 0
     assert len(played_cards) == n_cards
+
+def test_face_value_single_char_rep():
+
+    for face_value in FaceValue:
+        char_rep = face_value.single_char_rep()
+        assert isinstance(char_rep, str)
+        assert len(char_rep) == 1
+
+def test_suit_from_string():
+
+    valid_strings = ['S', 'H', 'D', 'C']
+
+    produced_suits = []
+    for valid_string in valid_strings:
+        produced_suits.append(Suit.from_string(valid_string))
+
+    # check they're all suits
+    assert all(isinstance(suit, Suit) for suit in produced_suits)
+    
+    # check all suits are represented
+    assert all(suit in produced_suits for suit in Suit)
+
+    invalid_strings = ['5', 5, None, 'SD', 'Å']
+    for invalid_string in invalid_strings:
+        with pytest.raises(ValueError):
+            Suit.from_string(invalid_string)
+
