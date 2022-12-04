@@ -61,7 +61,7 @@ class FaceValue(Enum):
 
     def __sub__(self, other):
 
-        return self.value - other.value
+        return abs(self.value - other.value)
 
 
 class Suit(Enum):
